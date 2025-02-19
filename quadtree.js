@@ -1,7 +1,8 @@
 class Point {
-    constructor(x, y) {
+    constructor(x, y, userData) {
         this.x = x;
         this.y = y;
+        this.userData = userData;
     }
 }
 
@@ -26,28 +27,15 @@ class Rect{
                 }
     }
 
-    intersect(boundary){
-        let boundaryR = boundary.x + boundary.width;
-        let boundaryL = boundary.x - boundary.width;
-        let boundaryT = boundary.y - boundary.height;
-        let boundaryB = boundary.y + boundary.height;
-
-        let rangeR = this.x + this.width;
-        let rangeL = this.x - this.width;
-        let rangeT = this.y - this.height;
-        let rangeB = this.y + this.height;
-    
-
-    if(boundaryR >= rangeL &&
-        boundaryL <= rangeR && 
-        boundaryT <= rangeB &&
-        boundaryB >= rangeT
-        ){
-            return true;
-        }else{
-            return false;
-        }
+    intersect(boundary) {
+        return !(
+            boundary.x - boundary.width > this.x + this.width ||
+            boundary.x + boundary.width < this.x - this.width ||
+            boundary.y - boundary.height > this.y + this.height ||
+            boundary.y + boundary.height < this.y - this.height
+        );
     }
+    
 
 }
 
@@ -89,6 +77,16 @@ class Quadtree{
     }
     
 
+    clearQuadtree() {
+        this.points = [];
+        this.divided = false;
+        this.ne = null;
+        this.nw = null;
+        this.se = null;
+        this.sw = null;
+    }
+    
+
     subdivide() {
         let x = this.boundary.x;
         let y = this.boundary.y;
@@ -113,7 +111,7 @@ class Quadtree{
     // finding point in particular range
     query(range, found){
         if(!range.intersect(this.boundary)){
-            return false;
+            return;
         }else{
             for(let i=0; i<this.points.length; i++){
                 if(range.contains(this.points[i])){
