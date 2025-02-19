@@ -1,7 +1,7 @@
 let quadtree;
 let boundary;
 let capacity = 1;
-let num  = 5000;
+let num  = 500;
 
 function setup() {
     createCanvas(400, 400);
@@ -19,5 +19,17 @@ function setup() {
 
 function draw() {
     background(220);
+
+    let range = new Rect(mouseX, mouseY, 40, 40);
+    noFill();
+    stroke(0, 255, 0);
+    rect(range.x - range.width, range.y - range.height, range.width * 2, range.height * 2);
+    let foundPoints = [];
+    quadtree.query(range, foundPoints);
     quadtree.display();
+    for(let i=0; i<foundPoints.length; i++){
+        noStroke();
+        fill(255, 0, 0);
+        ellipse(foundPoints[i].x, foundPoints[i].y, 3, 3);
+    }
 }

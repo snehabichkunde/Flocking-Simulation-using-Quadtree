@@ -26,6 +26,29 @@ class Rect{
                 }
     }
 
+    intersect(boundary){
+        let boundaryR = boundary.x + boundary.width;
+        let boundaryL = boundary.x - boundary.width;
+        let boundaryT = boundary.y - boundary.height;
+        let boundaryB = boundary.y + boundary.height;
+
+        let rangeR = this.x + this.width;
+        let rangeL = this.x - this.width;
+        let rangeT = this.y - this.height;
+        let rangeB = this.y + this.height;
+    
+
+    if(boundaryR >= rangeL &&
+        boundaryL <= rangeR && 
+        boundaryT <= rangeB &&
+        boundaryB >= rangeT
+        ){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 }
 
 class Quadtree{
@@ -88,8 +111,22 @@ class Quadtree{
     }
     
     // finding point in particular range
-    query(){
-
+    query(range, found){
+        if(!range.intersect(this.boundary)){
+            return false;
+        }else{
+            for(let i=0; i<this.points.length; i++){
+                if(range.contains(this.points[i])){
+                    found.push(this.points[i]);
+                }
+            }
+            if(this.divided){
+                this.ne.query(range, found);
+                this.nw.query(range, found);
+                this.se.query(range, found);
+                this.sw.query(range, found);
+            }
+        }
     }
 
     display() {
@@ -104,7 +141,7 @@ class Quadtree{
         // Draw all points in the quadtree
         fill(0);
         for (let p of this.points) {
-            ellipse(p.x, p.y, 1, 1);
+            ellipse(p.x, p.y, 3, 3);
         }
 
         if(this.divided){
