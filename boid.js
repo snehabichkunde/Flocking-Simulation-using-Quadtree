@@ -1,5 +1,3 @@
-let perceptionRadious = 20;
-
 class Boid{
 
     constructor(x, y){
@@ -7,7 +5,7 @@ class Boid{
         this.velocity = p5.Vector.random2D();
         this.velocity.mult(random(-3, 3));
         this.acceleration = createVector(0, 0);
-        this.maxSpeed = 2;
+        this.maxSpeed = 1.5;
         this.maxForce = 0.1;
     }
 
@@ -80,7 +78,7 @@ class Boid{
 
     }
 
-    seperation(){
+    seperation(boids){
         let steering = createVector();  
         let total = 0; 
 
