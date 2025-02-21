@@ -37,7 +37,7 @@ function setup() {
 function draw() {
     background(220);
     for(let i = 0; i< num; i++){
-        boids[i].alignment(boids);
+        boids[i].flock(boids);
         boids[i].display();
         boids[i].update();
     }

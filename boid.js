@@ -1,4 +1,4 @@
-let perceptionRadious = 10;
+let perceptionRadious = 30;
 
 class Boid{
 
@@ -30,6 +30,7 @@ class Boid{
         this.edges();
         this.position.add(this.velocity);
         this.velocity.add(this.acceleration);
+        this.acceleration.mult(0);
     }
 
     // make flock of boids to travel in the same direction 
@@ -50,10 +51,43 @@ class Boid{
             steering.sub(this.velocity);
             steering.limit(this.maxForce);
         }
-        this.acceleration = steering;
+        return steering;
     }
 
-    cohension(){
+    // this is will get the sentral position of the boids
+    cohension(boids){
+
+        let steering = createVector();  
+        let total = 0; 
+
+        for(let i=0; i<boids.length; i++){
+            let d = dist(this.position.x, this.position.y, boids[i].position.x, boids[i].position.y);
+            if(boids[i]!= this && d < perceptionRadious){
+                steering.add(boids[i].position);
+                total++;
+            }
+        }
+        if(total>0){
+            steering.div(total);
+            // now we need the vector direction from the current position towords the center of mass 
+            steering.sub(this.position);
+            steering.setMag(this.maxSpeed);
+            steering.sub(this.velocity);
+            steering.limit(this.maxForce);
+        }
+
+        return steering;
+
+    }
+
+    flock(boids){
+
+        let alignment = this.alignment(boids);
+        let cohesion = this.cohension(boids);
+
+
+        this.acceleration.add(alignment);
+        this.acceleration.add(cohesion);
 
     }
     
@@ -65,7 +99,7 @@ class Boid{
     display(){
         noStroke();
         fill(0);
-        ellipse(this.position.x, this.position.y,  3, 3)
+        ellipse(this.position.x, this.position.y,  10, 10)
     }
 
 }
