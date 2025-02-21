@@ -139,7 +139,7 @@ class Quadtree{
         // Draw all points in the quadtree
         fill(0);
         for (let p of this.points) {
-            ellipse(p.x, p.y, 3, 3);
+            ellipse(p.x, p.y, 2, 2);
         }
 
         if(this.divided){

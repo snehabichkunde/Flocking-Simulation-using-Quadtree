@@ -2,7 +2,7 @@ class Partical{
     constructor(x, y){
         this.x = x;
         this.y = y;
-        this.r = 3;
+        this.r = 2;
         this.vx = random(-2,2);
         this.vy = random(-2,2);
         this.collided = false;
