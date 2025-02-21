@@ -7,7 +7,7 @@
 // let particals = [];
 
 let boids = [];
-let num = 200;
+let num = 500;
 
 
 
@@ -43,7 +43,7 @@ function draw() {
     }
 
     // quadtree.clearQuadtree();
-    // // print(frameRate());
+    print(frameRate());
 
     // // Insert all particles into the quadtree
     // for (let i = 0; i < num; i++) {

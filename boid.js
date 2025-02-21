@@ -1,4 +1,4 @@
-let perceptionRadious = 30;
+let perceptionRadious = 20;
 
 class Boid{
 
@@ -7,8 +7,8 @@ class Boid{
         this.velocity = p5.Vector.random2D();
         this.velocity.mult(random(-3, 3));
         this.acceleration = createVector(0, 0);
-        this.maxSpeed = 1;
-        this.maxForce = 1;
+        this.maxSpeed = 2;
+        this.maxForce = 0.1;
     }
 
     edges(){
@@ -80,26 +80,48 @@ class Boid{
 
     }
 
+    seperation(){
+        let steering = createVector();  
+        let total = 0; 
+
+        for(let i=0; i<boids.length; i++){
+            let d = dist(this.position.x, this.position.y, boids[i].position.x, boids[i].position.y);
+            if(boids[i]!= this && d < perceptionRadious){
+                let neighbourVector = p5.Vector.sub(this.position, boids[i].position);
+                neighbourVector.div(d*d);  // larger the distance , smaller the force;
+                steering.add(neighbourVector);
+                total++;
+            }
+        }
+        if(total>0){
+            steering.div(total);
+            steering.setMag(this.maxSpeed);
+            steering.sub(this.velocity);
+            steering.limit(this.maxForce);
+        }
+
+        return steering;
+    }
+
     flock(boids){
 
         let alignment = this.alignment(boids);
         let cohesion = this.cohension(boids);
+        let seperation = this.seperation(boids);
 
 
         this.acceleration.add(alignment);
         this.acceleration.add(cohesion);
+        this.acceleration.add(seperation);
 
     }
     
 
-    seperation(){
-
-    }
 
     display(){
         noStroke();
         fill(0);
-        ellipse(this.position.x, this.position.y,  10, 10)
+        ellipse(this.position.x, this.position.y,  3, 3)
     }
 
 }
