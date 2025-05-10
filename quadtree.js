@@ -6,148 +6,112 @@ class Point {
     }
 }
 
-
-// for boundary and range 
-class Rect{
-    constructor(x, y, width, height) {
+class Rectangle {
+    constructor(x, y, w, h) {
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.w = w;
+        this.h = h;
     }
 
-    contains(point){
-        if(point.x >= this.x - this.width && 
-            point.x < this.x + this.width && 
-            point.y >= this.y - this.height && 
-            point.y < this.y + this.height){
-                return true;
-            } else {
-                return false;
-                }
-    }
-
-    intersect(boundary) {
-        return !(
-            boundary.x - boundary.width > this.x + this.width ||
-            boundary.x + boundary.width < this.x - this.width ||
-            boundary.y - boundary.height > this.y + this.height ||
-            boundary.y + boundary.height < this.y - this.height
+    contains(point) {
+        return (
+            point.x >= this.x - this.w &&
+            point.x <= this.x + this.w &&
+            point.y >= this.y - this.h &&
+            point.y <= this.y + this.h
         );
     }
-    
 
+    intersects(range) {
+        return !(
+            range.x - range.w > this.x + this.w ||
+            range.x + range.w < this.x - this.w ||
+            range.y - range.h > this.y + this.h ||
+            range.y + range.h < this.y - this.h
+        );
+    }
 }
 
-class Quadtree{
-    constructor(boundary , capacity){
+class Quadtree {
+    constructor(boundary, capacity) {
         this.boundary = boundary;
         this.capacity = capacity;
         this.points = [];
         this.divided = false;
     }
 
-    insert(point) {
-        if (!this.boundary.contains(point)) {
-            return false;  
-        }
-        
-        if (this.points.length < this.capacity) {
-            this.points.push(point);
-            return true;
-        }
-        else{
-            if(!this.divided){
-                this.subdivide();
-            }
-            if(this.ne.insert(point)){
-                return true;
-            }
-            else if(this.nw.insert(point)){
-                return true;
-            }
-            else if(this.sw.insert(point)){
-                return true;
-            }
-            else if(this.se.insert(point)){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-
-    clearQuadtree() {
-        this.points = [];
-        this.divided = false;
-        this.ne = null;
-        this.nw = null;
-        this.se = null;
-        this.sw = null;
-    }
-    
-
     subdivide() {
         let x = this.boundary.x;
         let y = this.boundary.y;
-        let w = this.boundary.width / 2;
-        let h = this.boundary.height / 2;
-    
-        let ne_boundary = new Rect(x + w, y - h, w, h);
-        this.ne = new Quadtree(ne_boundary, this.capacity);
-    
-        let nw_boundary = new Rect(x - w, y - h, w, h);
-        this.nw = new Quadtree(nw_boundary, this.capacity);
-    
-        let se_boundary = new Rect(x + w, y + h, w, h);
-        this.se = new Quadtree(se_boundary, this.capacity);
-    
-        let sw_boundary = new Rect(x - w, y + h, w, h);
-        this.sw = new Quadtree(sw_boundary, this.capacity);
-    
+        let w = this.boundary.w / 2;
+        let h = this.boundary.h / 2;
+
+        let ne = new Rectangle(x + w, y - h, w, h);
+        this.northeast = new Quadtree(ne, this.capacity);
+        let nw = new Rectangle(x - w, y - h, w, h);
+        this.northwest = new Quadtree(nw, this.capacity);
+        let se = new Rectangle(x + w, y + h, w, h);
+        this.southeast = new Quadtree(se, this.capacity);
+        let sw = new Rectangle(x - w, y + h, w, h);
+        this.southwest = new Quadtree(sw, this.capacity);
+
         this.divided = true;
     }
-    
-    // finding point in particular range
-    query(range, found){
-        if(!range.intersect(this.boundary)){
-            return;
-        }else{
-            for(let i=0; i<this.points.length; i++){
-                if(range.contains(this.points[i])){
-                    found.push(this.points[i]);
+
+    insert(point) {
+        if (!this.boundary.contains(point)) {
+            return false;
+        }
+
+        if (this.points.length < this.capacity) {
+            this.points.push(point);
+            return true;
+        } else {
+            if (!this.divided) {
+                this.subdivide();
+            }
+
+            return (
+                this.northeast.insert(point) ||
+                this.northwest.insert(point) ||
+                this.southeast.insert(point) ||
+                this.southwest.insert(point)
+            );
+        }
+    }
+
+    query(range, found) {
+        if (!found) found = [];
+
+        if (!this.boundary.intersects(range)) {
+            return found;
+        } else {
+            for (let p of this.points) {
+                if (range.contains(p)) {
+                    found.push(p);
                 }
             }
-            if(this.divided){
-                this.ne.query(range, found);
-                this.nw.query(range, found);
-                this.se.query(range, found);
-                this.sw.query(range, found);
+            if (this.divided) {
+                this.northwest.query(range, found);
+                this.northeast.query(range, found);
+                this.southwest.query(range, found);
+                this.southeast.query(range, found);
             }
+            return found;
         }
     }
 
-    display() {
-        noFill();
+    show() {
         stroke(0);
-        //rectMode(CENTER);
-        rect(this.boundary.x - this.boundary.width, 
-             this.boundary.y - this.boundary.height, 
-             this.boundary.width * 2, 
-             this.boundary.height * 2);
-    
-        // Draw all points in the quadtree
-        fill(0);
-        for (let p of this.points) {
-            ellipse(p.x, p.y, 2, 2);
-        }
+        noFill();
+        rect(this.boundary.x - this.boundary.w, this.boundary.y - this.boundary.h, this.boundary.w * 2, this.boundary.h * 2);
 
-        if(this.divided){
-            this.ne.display();
-            this.nw.display();
-            this.se.display();
-            this.sw.display();
+        if (this.divided) {
+            this.northeast.show();
+            this.northwest.show();
+            this.southeast.show();
+            this.southwest.show();
         }
     }
-    
 }
